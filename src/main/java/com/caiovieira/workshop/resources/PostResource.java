@@ -1,5 +1,6 @@
 package com.caiovieira.workshop.resources;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +20,33 @@ import com.caiovieira.workshop.services.PostService;
 public class PostResource {
 	@Autowired
 	PostService postService;
-	
+
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<Post> findById(@PathVariable String id) {
 		Post post = postService.findById(id);
 		return ResponseEntity.ok().body(post);
 	}
-	
+
 	@GetMapping(value = "/titlesearch")
-    public ResponseEntity<List<Post>> search(@RequestParam(value = "text", defaultValue = "") String text) {
-		text=URL.decodeParam(text);
+	public ResponseEntity<List<Post>> search(@RequestParam(value = "text", defaultValue = "") String text) {
+		text = URL.decodeParam(text);
 		List<Post> posts = postService.findByTitle(text);
 		return ResponseEntity.ok().body(posts);
-    } 
-	
-	
-	
+	}
+
+	@GetMapping(value = "/fullsearch")
+	public ResponseEntity<List<Post>> fullSearch(
+			@RequestParam(value = "text", defaultValue = "") String text,
+			@RequestParam(value = "minDate", defaultValue = "") String minDate,
+			@RequestParam(value = "maxDate", defaultValue = "") String maxDate
+	) {
+
+		text = URL.decodeParam(text);
+		LocalDateTime min = URL.convertDate(minDate != ""  ? minDate : LocalDateTime.now().toString());
+		LocalDateTime max = URL.convertDate(maxDate != ""  ? maxDate : LocalDateTime.now().toString());
+		
+		List<Post> posts = postService.fullSearch(text, min, max);
+		return ResponseEntity.ok().body(posts);
+	}
+
 }
